@@ -1,7 +1,7 @@
 const User = require("../../models/User");
 
 module.exports = (req, res, next) => {
-  const { email, password } = req.body;
+  const { firstName, lastName, username, email, password } = req.body;
 
   User.findOne({ email }, (error, user) => {
     if (error) {
@@ -12,7 +12,13 @@ module.exports = (req, res, next) => {
       return next({ message: "Email already exists", statusCode: 400 });
     }
 
-    const newUser = new User({ email, password });
+    const newUser = new User({
+      firstName,
+      lastName,
+      username,
+      email,
+      password,
+    });
 
     newUser.save((error) => {
       if (error) {
