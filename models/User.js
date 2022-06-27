@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const { Schema, model } = mongoose;
 const bcrypt = require("bcrypt");
 
-const userSchema = new Schema({
+const UserSchema = new Schema({
   role: {
     type: String,
     enum: ["user", "admin"],
@@ -66,7 +66,7 @@ const userSchema = new Schema({
   },
 });
 
-userSchema.pre("save", function (next) {
+UserSchema.pre("save", function (next) {
   if (!this.isModified("password")) {
     return next();
   }
@@ -81,6 +81,13 @@ userSchema.pre("save", function (next) {
   });
 });
 
-const UserModel = model("user", userSchema);
+UserSchema.methods.isValidPassword = async function (password) {
+  const user = this;
+  const compare = await bcrypt.compare(password, user.password);
+
+  return compare;
+};
+
+const UserModel = model("user", UserSchema);
 
 module.exports = UserModel;

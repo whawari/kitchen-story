@@ -1,24 +1,20 @@
 const express = require("express");
 const router = express.Router();
+
 const validateEmail = require("../middleware/validateEmail");
 const signup = require("../controllers/auth/signup");
+const jwtSign = require("../middleware/jwtSign");
+const login = require("../middleware/login");
+const jwtRemove = require("../middleware/jwtRemove");
+const routerErrorhandler = require("../middleware/routerErrorhandler");
+const verifyJWT = require("../middleware/verifyJWT");
 
-router.post("/signup", validateEmail, signup, (req, res) => {
-  res.status(200).json({
-    message: "Account created successfully",
-    status: "success",
-  });
-});
+router.post("/signup", validateEmail, signup);
 
-router.use((error, req, res, next) => {
-  if (error.statusCode && error.message) {
-    return res.status(error.statusCode).json({
-      message: error.message,
-      status: "fail",
-    });
-  }
+router.post("/login", login, jwtSign, verifyJWT);
 
-  res.status(500).send(`Something went wrong: ${error}`);
-});
+router.post("/logout", jwtRemove);
+
+router.use(routerErrorhandler);
 
 module.exports = router;

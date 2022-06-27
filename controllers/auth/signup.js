@@ -2,7 +2,6 @@ const User = require("../../models/User");
 
 module.exports = (req, res, next) => {
   const { firstName, lastName, username, email, password } = req.body;
-
   User.findOne({ email }, (error, user) => {
     if (error) {
       return next({ message: error.message, statusCode: 500 });
@@ -28,7 +27,10 @@ module.exports = (req, res, next) => {
         });
       }
 
-      return next();
+       res.status(200).json({
+         message: "Account created successfully",
+         status: "success",
+       });
     });
   });
 };
