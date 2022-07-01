@@ -1,11 +1,15 @@
-require("../helpers/testEmailValidation").testEmailValidation;
+const isEmailValid = require("../helpers").isEmailValid;
 
-const testEmailValidation = (req, res, next) => {
+module.exports = (req, res, next) => {
   const { email } = req.body;
 
-  if (testEmailValidation(email)) return next();
+  if (isEmailValid(email)) return next();
 
-  return next({ message: "Invalid email", statusCode: 400 });
+  return next({
+    message: "validation error",
+    statusCode: 400,
+    hint: {
+      email: "invalid email",
+    },
+  });
 };
-
-module.exports = testEmailValidation;
