@@ -1,14 +1,14 @@
 const JWT = require("jsonwebtoken");
 
-module.exports = (userID, secretKey) => {
+module.exports = (payload = {}, secretKey, options = {}) => {
   return new Promise((resolve, reject) => {
     JWT.sign(
       {
         iss: "Kitchen Story",
-        sub: userID,
+        payload,
       },
       secretKey,
-      { expiresIn: "1h" },
+      options,
       (error, token) => {
         if (error) reject(error);
 

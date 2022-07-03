@@ -1,13 +1,24 @@
+const RefreshTokenModel = require("../../models/RefreshTokenModel");
+
 module.exports = async (req, res, next) => {
-  let accessToken;
+  let refreshToken;
 
   if (req && req.cookies) {
-    accessToken = req.cookies["access_token"];
+    refreshToken = req.cookies["refresh_token"];
   }
 
-  if (!accessToken) return next({ message: "unauthorized", statusCode: 403 });
+  if (!refreshToken)
+    return next({ message: "unauthenticated", statusCode: 401 });
 
-  res.clearCookie("access_token");
+  try {
+    const userToken = await RefreshTokenModel.findOne({ token: refreshToken });
+
+    if (userToken) await userToken.remove();
+
+    res.clearCookie("refresh_token");
+  } catch (error) {
+    return next(error);
+  }
 
   res.status(200).json({
     message: "logged out",

@@ -8,7 +8,6 @@ const handleErrors = require("../middleware/handleErrors");
 
 const SignupController = require("../controllers/Auth/Signup");
 const LoginController = require("../controllers/Auth/Login");
-const AuthenticateController = require("../controllers/Auth/Authenticate");
 const LogoutController = require("../controllers/Auth/Logout");
 
 router.post(
@@ -42,9 +41,7 @@ router.post(
   LoginController
 );
 
-router.get("/authenticate", AuthenticateController);
-
-router.get("/logout", LogoutController);
+router.delete("/logout", LogoutController);
 
 router.use(handleErrors);
 
