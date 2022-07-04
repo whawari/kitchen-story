@@ -11,12 +11,12 @@ const UserSchema = new Schema({
 
   firstName: {
     type: String,
-    required: [true, "FirstName is required"],
+    required: [true, "required"],
   },
 
   lastName: {
     type: String,
-    required: [true, "LastName is required"],
+    required: [true, "required"],
   },
 
   profilePhotoUrl: {
@@ -29,28 +29,34 @@ const UserSchema = new Schema({
 
   username: {
     type: String,
-    required: [true, "Username is required"],
+    required: [true, "required"],
     unique: true,
+    trim: true,
+    lowercase: true,
   },
 
   email: {
     type: String,
-    required: [true, "Email address is required"],
-    lowercase: true,
-    trim: true,
+    required: [true, "required"],
     unique: true,
+    trim: true,
+    lowercase: true,
+    match: [/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/, "invalid email"],
   },
 
   password: {
     type: String,
-    required: [true, "Password is required"],
-    minLength: [8, "Password must be at least 8 characters"],
-    maxLength: [32, "Password must be at maximum 32 characters"],
+    required: [true, "required"],
+    minLength: [8, "must contain at least 8 characters"],
+    maxLength: [32, "must contain a maximum of 32 characters"],
   },
 
   gender: {
     type: String,
-    enum: ["male", "female"],
+    enum: {
+      values: ["male", "female"],
+      message: "{VALUE} is not a valid value",
+    },
   },
 
   phoneNumber: {
@@ -83,6 +89,7 @@ UserSchema.pre("save", function (next) {
 
 UserSchema.methods.isValidPassword = async function (password) {
   const user = this;
+
   const compare = await bcrypt.compare(password, user.password);
 
   return compare;

@@ -1,36 +1,71 @@
-const User = require("../../models/User");
+const UserModel = require("../../models/UserModel");
 
 module.exports = (req, res, next) => {
   const { firstName, lastName, username, email, password } = req.body;
-  User.findOne({ email }, (error, user) => {
-    if (error) {
-      return next({ message: error.message, statusCode: 500 });
-    }
 
-    if (user) {
-      return next({ message: "Email already exists", statusCode: 400 });
-    }
+  UserModel.find({ $or: [{ email: email }, { username: username }] })
+    .limit(1)
+    .exec((error, results) => {
+      if (error) return next(error);
 
-    const newUser = new User({
-      firstName,
-      lastName,
-      username,
-      email,
-      password,
-    });
+      if (results.length > 0) {
+        const result = results[0];
 
-    newUser.save((error) => {
-      if (error) {
-        return next({
-          message: "Error saving user: " + error.message,
-          statusCode: 500,
-        });
+        if (email === result?.email && username === result?.username) {
+          return next({
+            message: "validation error",
+            statusCode: 409,
+            hint: {
+              email: "email already exists",
+              username: "username already exists",
+            },
+          });
+        } else if (email === result?.email) {
+          return next({
+            message: "validation error",
+            statusCode: 409,
+            hint: {
+              email: "email already exists",
+            },
+          });
+        } else if (username === result?.username) {
+          return next({
+            message: "validation error",
+            statusCode: 409,
+            hint: {
+              username: "username already exists",
+            },
+          });
+        }
       }
 
-       res.status(200).json({
-         message: "Account created successfully",
-         status: "success",
-       });
+      const user = new UserModel({
+        firstName,
+        lastName,
+        username,
+        email,
+        password,
+      });
+
+      const userError = user.validateSync();
+
+      if (userError) {
+        let hint = {};
+
+        for (let key in userError.errors) {
+          hint[key] = userError.errors[key].message;
+        }
+
+        return next({ message: "validation error", statusCode: 400, hint });
+      }
+
+      user.save((error) => {
+        if (error) return next(error);
+
+        res.status(201).json({
+          message: "account created",
+          status: "success",
+        });
+      });
     });
-  });
 };

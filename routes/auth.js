@@ -1,20 +1,48 @@
 const express = require("express");
 const router = express.Router();
 
+const validateRequestBody = require("../middleware/validateRequestBody");
+const validateRequiredFields = require("../middleware/validateRequiredFields");
 const validateEmail = require("../middleware/validateEmail");
-const signup = require("../controllers/auth/signup");
-const jwtSign = require("../middleware/jwtSign");
-const login = require("../middleware/login");
-const jwtRemove = require("../middleware/jwtRemove");
-const routerErrorhandler = require("../middleware/routerErrorhandler");
-const verifyJWT = require("../middleware/verifyJWT");
+const handleErrors = require("../middleware/handleErrors");
 
-router.post("/signup", validateEmail, signup);
+const SignupController = require("../controllers/Auth/Signup");
+const LoginController = require("../controllers/Auth/Login");
+const LogoutController = require("../controllers/Auth/Logout");
 
-router.post("/login", login, jwtSign, verifyJWT);
+router.post(
+  "/signup",
+  validateRequestBody,
+  (req, res, next) => {
+    req.requiredFields = [
+      "firstName",
+      "lastName",
+      "username",
+      "email",
+      "password",
+    ];
 
-router.post("/logout", jwtRemove);
+    next();
+  },
+  validateRequiredFields,
+  validateEmail,
+  SignupController
+);
 
-router.use(routerErrorhandler);
+router.post(
+  "/login",
+  validateRequestBody,
+  (req, res, next) => {
+    req.requiredFields = ["username", "password"];
+
+    next();
+  },
+  validateRequiredFields,
+  LoginController
+);
+
+router.delete("/logout", LogoutController);
+
+router.use(handleErrors);
 
 module.exports = router;

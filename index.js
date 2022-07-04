@@ -1,22 +1,25 @@
 const express = require("express");
 const cookieParser = require("cookie-parser");
+const cors = require('cors')
 
 require("dotenv").config();
+
 require("./services/mongoose");
+
+const serverRouter = require("./routes/server");
+const authRouter = require("./routes/auth");
+const tokenRouter = require("./routes/token");
 
 const app = express();
 const port = process.env.PORT || 5000;
 
-const serverRouter = require("./routes/server");
-const authRouter = require("./routes/auth");
-const products = require("./routes/products");
-
+app.use(cors())
 app.use(express.json());
 app.use(cookieParser());
 
 app.use("/server", serverRouter);
 app.use("/auth", authRouter);
-app.use("/", products);
+app.use("/token", tokenRouter);
 
 app.listen(port, () => {
   console.log(`Server is up and listening on port ${port}`);
