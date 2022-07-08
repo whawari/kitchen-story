@@ -1,4 +1,6 @@
-const RefreshTokenModel = require("../../models/RefreshTokenModel");
+const TokenModel = require("../../models/TokenModel");
+
+const verifyToken = require("../../services/verifyToken");
 
 module.exports = async (req, res, next) => {
   let refreshToken;
@@ -11,9 +13,9 @@ module.exports = async (req, res, next) => {
     return next({ message: "unauthenticated", statusCode: 401 });
 
   try {
-    const userToken = await RefreshTokenModel.findOne({ token: refreshToken });
+    await verifyToken(refreshToken, process.env.REFRESH_TOKEN_SECRET_KEY);
 
-    if (userToken) await userToken.remove();
+    await TokenModel.deleteOne({ token: refreshToken });
 
     res.clearCookie("refresh_token");
   } catch (error) {

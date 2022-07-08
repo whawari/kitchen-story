@@ -3,9 +3,9 @@ const router = express.Router();
 
 const handleErrors = require("../middleware/handleErrors");
 
-const RefreshAccessTokenController = require("../controllers/Token/RefreshAccessToken");
+const RefreshTokenController = require("../controllers/Token/RefreshToken");
 
-router.get("/refresh-access", RefreshAccessTokenController);
+router.get("/refresh", RefreshTokenController);
 
 router.use(handleErrors);
 

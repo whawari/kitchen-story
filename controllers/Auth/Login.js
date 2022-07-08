@@ -1,5 +1,5 @@
 const UserModel = require("../../models/UserModel");
-const RefreshTokenModel = require("../../models/RefreshTokenModel");
+const TokenModel = require("../../models/TokenModel");
 
 const signToken = require("../../services/signToken");
 
@@ -13,8 +13,11 @@ module.exports = (req, res, next) => {
 
       if (results.length === 0)
         return next({
-          message: "user not found",
+          message: "validation error",
           statusCode: 404,
+          hint: {
+            username: "user not found",
+          },
         });
 
       try {
@@ -24,8 +27,11 @@ module.exports = (req, res, next) => {
 
         if (!isValidPassword)
           return next({
-            message: "invalid username or password",
+            message: "validation error",
             statusCode: 409,
+            hint: {
+              password: "invalid password",
+            },
           });
 
         const { _id, firstName, lastName, username, email, role } = user;
@@ -50,11 +56,7 @@ module.exports = (req, res, next) => {
           { expiresIn: +process.env.REFRESH_TOKEN_EXPIRY_TIME }
         );
 
-        const userToken = await RefreshTokenModel.findOne({ userId: _id });
-
-        if (userToken) await userToken.remove();
-
-        await new RefreshTokenModel({
+        await new TokenModel({
           userId: _id,
           token: refreshToken,
         }).save();
